@@ -43,8 +43,10 @@ cat << EOF >> /etc/fluent/fluent.conf
   host $(eval echo \$${SVC_HOST})
   port $(eval echo \$${SVC_PORT})
   scheme ${ELASTICSEARCH_SCHEME}
+  $([ -n "${ELASTICSEARCH_USER}" ] && echo user ${ELASTICSEARCH_USER})
+  $([ -n "${ELASTICSEARCH_PASSWORD}" ] && echo password ${ELASTICSEARCH_PASSWORD})
   buffer_type ${FLUENTD_BUFFER_TYPE}
-  $([ "${FLUENTD_BUFFER_TYPE}" == "file" ] && echo ${FLUENTD_BUFFER_PATH})
+  $([ "${FLUENTD_BUFFER_TYPE}" == "file" ] && echo buffer_path ${FLUENTD_BUFFER_PATH})
   buffer_chunk_limit ${FLUENTD_BUFFER_CHUNK_LIMIT}
   buffer_queue_limit ${FLUENTD_BUFFER_QUEUE_LIMIT}
   flush_interval ${FLUENTD_FLUSH_INTERVAL}
