@@ -3,12 +3,6 @@
 ELASTICSEARCH_SERVICE_NAME=$(echo "${ELASTICSEARCH_SERVICE_NAME:-ELASTICSEARCH}" | awk '{print toupper($0)}')
 SVC_HOST=${ELASTICSEARCH_SERVICE_NAME}_SERVICE_HOST
 SVC_PORT=${ELASTICSEARCH_SERVICE_NAME}_SERVICE_PORT
-ELASTICSEARCH_URL=$(eval echo \$${SVC_HOST}):$(eval echo \$${SVC_PORT})
-
-if [ "${ELASTICSEARCH_URL}" == ":" ]; then
-  >&2 echo "Invalid Elasticsearch URL"
-  exit 1
-fi
 
 mkdir /etc/fluent
 
@@ -32,10 +26,12 @@ cat << 'EOF' > /etc/fluent/fluent.conf
   type elasticsearch
   logstash_format true
   reload_connections false
+  time_key time
 EOF
 
 cat << EOF >> /etc/fluent/fluent.conf
-  hosts ${ELASTICSEARCH_URL}
+  host $(eval echo \$${SVC_HOST})
+  port $(eval echo \$${SVC_PORT})
 EOF
 
 cat << 'EOF' >> /etc/fluent/fluent.conf
