@@ -13,7 +13,6 @@ service to send data to (default: `ELASTICSEARCH`)
 * `ELASTICSEARCH_SCHEME` - `http` or `https`
 * `ELASTICSEARCH_USER` - user to connect with
 * `ELASTICSEARCH_PASSWORD` - password to connect with
-* `ELASTICSEARCH_SCHEME` - `http` or `https`
 * `FLUENTD_FLUSH_INTERVAL` - how often to flush fluentd data
 (default: `60s`)
 * `FLUENTD_FLUSH_THREADS` - number of threads to use to flush
