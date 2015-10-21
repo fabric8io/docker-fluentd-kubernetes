@@ -1,4 +1,4 @@
-FROM fluentd
+FROM fabric8/fluentd:0.12.16
 
 MAINTAINER Jimmi Dyson <jimmidyson@gmail.com>
 
