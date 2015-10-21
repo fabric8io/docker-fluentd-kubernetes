@@ -1,9 +1,8 @@
-FROM fabric8/fluentd:0.12.16
+FROM fluentd
 
 MAINTAINER Jimmi Dyson <jimmidyson@gmail.com>
 
-RUN apk add --update curl-dev && \
-    rm -rf /var/cache/apk/*
+RUN yum install -y gcc-c++
 
 RUN gem install fluent-plugin-kubernetes_metadata_filter \
                 fluent-plugin-forest \
