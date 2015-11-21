@@ -1,16 +1,17 @@
 #!/bin/sh
 
-ELASTICSEARCH_SERVICE_NAME=$(echo "${ELASTICSEARCH_SERVICE_NAME:-ELASTICSEARCH}" | awk '{print toupper($0)}')
-SVC_HOST=${ELASTICSEARCH_SERVICE_NAME}_SERVICE_HOST
-SVC_PORT=${ELASTICSEARCH_SERVICE_NAME}_SERVICE_PORT
+ELASTICSEARCH_SERVICE=${ELASTICSEARCH_SERVICE:-es-logging.default.svc}
+ELASTICSEARCH_SCHEME=${ELASTICSEARCH_PORT:-9200}
 ELASTICSEARCH_SCHEME=${ELASTICSEARCH_SCHEME:-http}
 
-FLUENTD_FLUSH_INTERVAL=${FLUENTD_FLUSH_INTERVAL:-60s}
+FLUENTD_FLUSH_INTERVAL=${FLUENTD_FLUSH_INTERVAL:-10s}
 FLUENTD_FLUSH_THREADS=${FLUENTD_FLUSH_THREADS:-1}
 FLUENTD_RETRY_LIMIT=${FLUENTD_RETRY_LIMIT:-10}
+FLUENTD_DISABLE_RETRY_LIMIT=${FLUENTD_DISABLE_RETRY_LIMIT:-true}
 FLUENTD_RETRY_WAIT=${FLUENTD_RETRY_WAIT:-1s}
+FLUENTD_MAX_RETRY_WAIT=${FLUENTD_MAX_RETRY_WAIT:-60s}
 FLUENTD_BUFFER_CHUNK_LIMIT=${FLUENTD_BUFFER_CHUNK_LIMIT:-8m}
-FLUENTD_BUFFER_QUEUE_LIMIT=${FLUENTD_BUFFER_QUEUE_LIMIT:-256}
+FLUENTD_BUFFER_QUEUE_LIMIT=${FLUENTD_BUFFER_QUEUE_LIMIT:-8192}
 FLUENTD_BUFFER_TYPE=${FLUENTD_BUFFER_TYPE:-memory}
 FLUENTD_BUFFER_PATH=${FLUENTD_BUFFER_PATH:-/var/fluentd/buffer}
 
@@ -19,29 +20,29 @@ mkdir /etc/fluent
 cat << 'EOF' > /etc/fluent/fluent.conf
 <source>
   type tail
-  path /var/lib/docker/containers/*/*-json.log
-  pos_file /etc/fluent/fluentd-docker.pos
-  time_format %Y-%m-%dT%H:%M:%S
-  tag docker.*
+  path /var/log/containers/*.log
+  pos_file /var/log/es-containers.log.pos
+  time_format %Y-%m-%dT%H:%M:%S.%N
+  tag kubernetes.*
   format json
+  read_from_head true
+  keep_time_key true
 </source>
 
-<match docker.var.lib.docker.containers.*.*.log>
-  type kubernetes
-  container_id ${tag_parts[5]}
-  tag docker.${name}
-</match>
+<filter kubernetes.**>
+  type kubernetes_metadata
+</filter>
 
-<match kubernetes>
+<match **>
   type elasticsearch
-  logstash_format true
-  reload_connections false
+  log_level info
+  include_tag_key true
   time_key time
 EOF
 
 cat << EOF >> /etc/fluent/fluent.conf
-  host $(eval echo \$${SVC_HOST})
-  port $(eval echo \$${SVC_PORT})
+  host ${ELASTICSEARCH_HOST}
+  port ${ELASTICSEARCH_PORT}
   scheme ${ELASTICSEARCH_SCHEME}
   $([ -n "${ELASTICSEARCH_USER}" ] && echo user ${ELASTICSEARCH_USER})
   $([ -n "${ELASTICSEARCH_PASSWORD}" ] && echo password ${ELASTICSEARCH_PASSWORD})
@@ -51,7 +52,9 @@ cat << EOF >> /etc/fluent/fluent.conf
   buffer_queue_limit ${FLUENTD_BUFFER_QUEUE_LIMIT}
   flush_interval ${FLUENTD_FLUSH_INTERVAL}
   retry_limit ${FLUENTD_RETRY_LIMIT}
+  $([ "${FLUENTD_DISABLE_RETRY_LIMIT}" == "true" ] && echo disable_retry_limit)
   retry_wait ${FLUENTD_RETRY_WAIT}
+  max_retry_wait ${FLUENTD_MAX_RETRY_WAIT}
   num_threads ${FLUENTD_FLUSH_THREADS}
 EOF
 
@@ -59,4 +62,4 @@ cat << 'EOF' >> /etc/fluent/fluent.conf
 </match>
 EOF
 
-exec fluentd
+exec je fluentd
