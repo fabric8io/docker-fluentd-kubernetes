@@ -15,6 +15,16 @@ variables:
 * `ELASTICSEARCH_SCHEME` - `http` or `https` (default: `http`)
 * `ELASTICSEARCH_USER` - user to connect with
 * `ELASTICSEARCH_PASSWORD` - password to connect with
+
+* `SYSLOG_HOST` - the syslog host to send data to (no default)
+* `SYSLOG_PORT` - the syslog port to send data to (no default)
+
+If you need to specify multiple syslog servers you can do -
+* `SYSLOG_HOST_1`
+* `SYSLOG_PORT_1`
+* `SYSLOG_HOST_2`
+* `SYSLOG_PORT_2`
+
 * `FLUENTD_FLUSH_INTERVAL` - how often to flush fluentd data
 (default: `10s`)
 * `FLUENTD_FLUSH_THREADS` - number of threads to use to flush
