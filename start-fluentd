@@ -14,6 +14,7 @@ FLUENTD_BUFFER_CHUNK_LIMIT=${FLUENTD_BUFFER_CHUNK_LIMIT:-8m}
 FLUENTD_BUFFER_QUEUE_LIMIT=${FLUENTD_BUFFER_QUEUE_LIMIT:-8192}
 FLUENTD_BUFFER_TYPE=${FLUENTD_BUFFER_TYPE:-memory}
 FLUENTD_BUFFER_PATH=${FLUENTD_BUFFER_PATH:-/var/fluentd/buffer}
+FLUENTD_LOGSTASH_FORMAT=${FLUENTD_LOGSTASH_FORMAT:-true}
 
 mkdir /etc/fluent
 
@@ -56,6 +57,7 @@ cat << EOF >> /etc/fluent/fluent.conf
   retry_wait ${FLUENTD_RETRY_WAIT}
   max_retry_wait ${FLUENTD_MAX_RETRY_WAIT}
   num_threads ${FLUENTD_FLUSH_THREADS}
+  logstash_format ${FLUENTD_LOGSTASH_FORMAT}
 EOF
 
 cat << 'EOF' >> /etc/fluent/fluent.conf
