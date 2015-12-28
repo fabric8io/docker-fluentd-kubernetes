@@ -34,6 +34,7 @@ logs (default: `1`)
 (default: `memory`)
 * `FLUENTD_BUFFER_PATH` - buffer file path if using a `file`
 buffer (default: `/var/fluentd/buffer`)
+* `FLUENTD_LOGSTASH_FORMAT` - use logstash format (default `true`)
 
 For more information on Fluentd buffer plugins & options, see
 http://docs.fluentd.org/articles/buffer-plugin-overview.
