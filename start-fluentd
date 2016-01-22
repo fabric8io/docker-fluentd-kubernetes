@@ -1,9 +1,4 @@
 #!/bin/sh
-
-ELASTICSEARCH_HOST=${ELASTICSEARCH_HOST:-es-logging.default.svc}
-ELASTICSEARCH_PORT=${ELASTICSEARCH_PORT:-9200}
-ELASTICSEARCH_SCHEME=${ELASTICSEARCH_SCHEME:-http}
-
 FLUENTD_FLUSH_INTERVAL=${FLUENTD_FLUSH_INTERVAL:-10s}
 FLUENTD_FLUSH_THREADS=${FLUENTD_FLUSH_THREADS:-1}
 FLUENTD_RETRY_LIMIT=${FLUENTD_RETRY_LIMIT:-10}
@@ -16,32 +11,36 @@ FLUENTD_BUFFER_TYPE=${FLUENTD_BUFFER_TYPE:-memory}
 FLUENTD_BUFFER_PATH=${FLUENTD_BUFFER_PATH:-/var/fluentd/buffer}
 FLUENTD_LOGSTASH_FORMAT=${FLUENTD_LOGSTASH_FORMAT:-true}
 
-mkdir /etc/fluent
-
-cat << 'EOF' > /etc/fluent/fluent.conf
-<source>
-  type tail
-  path /var/log/containers/*.log
-  pos_file /var/log/es-containers.log.pos
-  time_format %Y-%m-%dT%H:%M:%S.%N
-  tag kubernetes.*
-  format json
-  read_from_head true
-  keep_time_key true
-</source>
-
-<filter kubernetes.**>
-  type kubernetes_metadata
-</filter>
-
-<match **>
-  type elasticsearch
-  log_level info
-  include_tag_key true
-  time_key time
+cat << EOF >> /etc/fluent/fluent.conf
+  <source>
+    type tail
+    path /var/log/containers/*.log
+    pos_file /var/log/es-containers.log.pos
+    time_format %Y-%m-%dT%H:%M:%S.%N
+    tag kubernetes.*
+    format json
+    read_from_head true
+    keep_time_key true
+  </source>
+  <filter kubernetes.**>
+    type kubernetes_metadata
+  </filter>
+  <match **>
+  @type copy
 EOF
 
+if [ -n "$ELASTICSEARCH_HOST" ]
+  then
+  echo "Starting fluentd with elastic search configuration!"
+  ELASTICSEARCH_PORT=${ELASTICSEARCH_PORT:-9200}
+  ELASTICSEARCH_SCHEME=${ELASTICSEARCH_SCHEME:-http}
+
 cat << EOF >> /etc/fluent/fluent.conf
+<store>
+  @type elasticsearch
+  log_level warn
+  include_tag_key true
+  time_key time
   host ${ELASTICSEARCH_HOST}
   port ${ELASTICSEARCH_PORT}
   scheme ${ELASTICSEARCH_SCHEME}
@@ -59,8 +58,40 @@ cat << EOF >> /etc/fluent/fluent.conf
   num_threads ${FLUENTD_FLUSH_THREADS}
   logstash_format ${FLUENTD_LOGSTASH_FORMAT}
 EOF
+fi
 
-cat << 'EOF' >> /etc/fluent/fluent.conf
+NUM=$(env | grep -oE '^(SYSLOG_HOST_\d*)' | wc -l)
+for ((i=1; i<=$NUM; i++)) do
+host=$(eval "echo \$SYSLOG_HOST_$i")
+port=$(eval "echo \$SYSLOG_PORT_$i")
+if [ -n "$host" ]
+then
+echo "Starting fluentd with syslog configuration! -- $host:$port"
+cat << EOF >> /etc/fluent/fluent.conf
+<store>
+  @type remote_syslog
+  host $host
+  port $port
+  log_level warn
+</store>
+EOF
+fi
+done
+
+if [ -n "$SYSLOG_HOST" ]
+then
+echo "Starting fluentd with syslog configuration! -- $SYSLOG_HOST:$SYSLOG_PORT"
+cat << EOF >> /etc/fluent/fluent.conf
+<store>
+  @type remote_syslog
+  host $SYSLOG_HOST
+  port $SYSLOG_PORT
+  log_level warn
+</store>
+EOF
+fi
+
+cat << EOF >> /etc/fluent/fluent.conf
 </match>
 EOF
 
