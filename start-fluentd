@@ -58,6 +58,7 @@ cat << EOF >> /etc/fluent/fluent.conf
   max_retry_wait ${FLUENTD_MAX_RETRY_WAIT}
   num_threads ${FLUENTD_FLUSH_THREADS}
   logstash_format ${FLUENTD_LOGSTASH_FORMAT}
+  reload_connections false
 EOF
 
 cat << 'EOF' >> /etc/fluent/fluent.conf
