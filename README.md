@@ -15,6 +15,9 @@ variables:
 * `ELASTICSEARCH_SCHEME` - `http` or `https` (default: `http`)
 * `ELASTICSEARCH_USER` - user to connect with
 * `ELASTICSEARCH_PASSWORD` - password to connect with
+* `ELASTICSEARCH_DYNAMIC` - whether elasticsearch plugin configuration is
+dymamic, e.g. to select index name prefix based on the namespace field
+(default: `false`)
 * `FLUENTD_FLUSH_INTERVAL` - how often to flush fluentd data
 (default: `10s`)
 * `FLUENTD_FLUSH_THREADS` - number of threads to use to flush
@@ -34,7 +37,11 @@ logs (default: `1`)
 (default: `memory`)
 * `FLUENTD_BUFFER_PATH` - buffer file path if using a `file`
 buffer (default: `/var/fluentd/buffer`)
-* `FLUENTD_LOGSTASH_FORMAT` - use logstash format (default `true`)
+* `FLUENTD_LOGSTASH_FORMAT` - use logstash format for index names (default `true`)
+* `FLUENTD_LOGSTASH_PREFIX` - the prefix to use for index names in logstash
+format (default `logstash`)
+* `KUBERNETES_PRESERVE_JSON_LOG` - whether to preserve raw JSON logs in the
+`log` field (default: `true`)
 
 For more information on Fluentd buffer plugins & options, see
 http://docs.fluentd.org/articles/buffer-plugin-overview.
