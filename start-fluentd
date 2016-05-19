@@ -16,6 +16,8 @@ FLUENTD_BUFFER_TYPE=${FLUENTD_BUFFER_TYPE:-memory}
 FLUENTD_BUFFER_PATH=${FLUENTD_BUFFER_PATH:-/var/fluentd/buffer}
 FLUENTD_LOGSTASH_FORMAT=${FLUENTD_LOGSTASH_FORMAT:-true}
 
+KUBERNETES_PRESERVE_JSON_LOG=${KUBERNETES_PRESERVE_JSON_LOG:-true}
+
 mkdir /etc/fluent
 
 cat << 'EOF' > /etc/fluent/fluent.conf
@@ -32,16 +34,17 @@ cat << 'EOF' > /etc/fluent/fluent.conf
 
 <filter kubernetes.**>
   type kubernetes_metadata
+  preserve_json_log ${KUBERNETES_PRESERVE_JSON_LOG}
 </filter>
 
 <match **>
-  type elasticsearch
-  log_level info
-  include_tag_key true
-  time_key time
 EOF
 
 cat << EOF >> /etc/fluent/fluent.conf
+  type elasticsearch$([ "${ELASTICSEARCH_DYNAMIC}" == "true" ] && echo _dynamic)
+  log_level info
+  include_tag_key true
+  time_key time
   host ${ELASTICSEARCH_HOST}
   port ${ELASTICSEARCH_PORT}
   scheme ${ELASTICSEARCH_SCHEME}
@@ -58,6 +61,7 @@ cat << EOF >> /etc/fluent/fluent.conf
   max_retry_wait ${FLUENTD_MAX_RETRY_WAIT}
   num_threads ${FLUENTD_FLUSH_THREADS}
   logstash_format ${FLUENTD_LOGSTASH_FORMAT}
+  $([ -n "${FLUENTD_LOGSTASH_PREFIX}" ] && echo logstash_prefix ${FLUENTD_LOGSTASH_PREFIX})
   reload_connections false
 EOF
 
