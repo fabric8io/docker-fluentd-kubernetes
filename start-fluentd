@@ -20,7 +20,7 @@ KUBERNETES_PRESERVE_JSON_LOG=${KUBERNETES_PRESERVE_JSON_LOG:-true}
 
 mkdir /etc/fluent
 
-cat << 'EOF' > /etc/fluent/fluent.conf
+cat << EOF >> /etc/fluent/fluent.conf
 <source>
   type tail
   path /var/log/containers/*.log
@@ -38,9 +38,6 @@ cat << 'EOF' > /etc/fluent/fluent.conf
 </filter>
 
 <match **>
-EOF
-
-cat << EOF >> /etc/fluent/fluent.conf
   type elasticsearch$([ "${ELASTICSEARCH_DYNAMIC}" == "true" ] && echo _dynamic)
   log_level info
   include_tag_key true
