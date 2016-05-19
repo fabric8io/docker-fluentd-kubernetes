@@ -6,7 +6,8 @@ ENTRYPOINT ["/start-fluentd"]
 
 ENV ELASTICSEARCH_HOST es-logging.default.svc
 
-RUN yum install -y gcc-c++
+RUN rpm --rebuilddb
+RUN yum install -y gcc-c++ && yum clean all
 
 RUN scl enable rh-ruby22 'gem install --no-document fluent-plugin-kubernetes_metadata_filter -v 0.21.0' && \
     scl enable rh-ruby22 'gem install --no-document fluent-plugin-elasticsearch -v 1.5.0' && \
