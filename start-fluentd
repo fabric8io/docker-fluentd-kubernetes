@@ -17,10 +17,13 @@ FLUENTD_BUFFER_PATH=${FLUENTD_BUFFER_PATH:-/var/fluentd/buffer}
 FLUENTD_LOGSTASH_FORMAT=${FLUENTD_LOGSTASH_FORMAT:-true}
 
 KUBERNETES_PRESERVE_JSON_LOG=${KUBERNETES_PRESERVE_JSON_LOG:-true}
+KUBERNETES_URL=${KUBERNETES_URL:-kubernetes.default.svc}
+KUBERNETES_VERIFY_SSL=${KUBERNETES_VERIFY_SSL:-true}
 
 mkdir /etc/fluent
 
 cat << EOF >> /etc/fluent/fluent.conf
+
 <source>
   type tail
   path /var/log/containers/*.log
@@ -34,6 +37,8 @@ cat << EOF >> /etc/fluent/fluent.conf
 
 <filter kubernetes.**>
   type kubernetes_metadata
+  kubernetes_url ${KUBERNETES_URL}
+  verify_ssl ${KUBERNETES_VERIFY_SSL}
   preserve_json_log ${KUBERNETES_PRESERVE_JSON_LOG}
 </filter>
 
