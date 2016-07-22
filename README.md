@@ -42,6 +42,8 @@ buffer (default: `/var/fluentd/buffer`)
 format (default `logstash`)
 * `KUBERNETES_PRESERVE_JSON_LOG` - whether to preserve raw JSON logs in the
 `log` field (default: `true`)
+* `KUBERNETES_HOST` - provide the hostname of the Kubernetes master (default: `kubernetes.default.svc`)
+* `KUBERNETES_VERIFY_SSL` - validate the Kubernetes SSL certificate (default: `true`)
 
 For more information on Fluentd buffer plugins & options, see
 http://docs.fluentd.org/articles/buffer-plugin-overview.
