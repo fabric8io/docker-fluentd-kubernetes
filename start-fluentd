@@ -23,9 +23,18 @@ KUBERNETES_VERIFY_SSL=${KUBERNETES_VERIFY_SSL:-true}
 mkdir /etc/fluent
 
 cat << EOF >> /etc/fluent/fluent.conf
+# input plugin that exports metrics
+<source>
+  @type prometheus
+</source>
+
+# input plugin that collects metrics from MonitorAgent
+<source>
+  @type prometheus_monitor
+</source>
 
 <source>
-  type tail
+  @type tail
   path /var/log/containers/*.log
   pos_file /var/log/es-containers.log.pos
   time_format %Y-%m-%dT%H:%M:%S.%N
@@ -40,6 +49,16 @@ cat << EOF >> /etc/fluent/fluent.conf
   kubernetes_url ${KUBERNETES_URL}
   verify_ssl ${KUBERNETES_VERIFY_SSL}
   preserve_json_log ${KUBERNETES_PRESERVE_JSON_LOG}
+</filter>
+
+<filter **>
+  @type prometheus
+
+  <metric>
+    name fluentd_records_total
+    type counter
+    desc The total number of records read by fluentd.
+  </metric>
 </filter>
 
 <match **>
