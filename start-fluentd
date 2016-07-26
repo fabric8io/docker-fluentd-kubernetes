@@ -45,7 +45,7 @@ cat << EOF >> /etc/fluent/fluent.conf
 </source>
 
 <filter kubernetes.**>
-  type kubernetes_metadata
+  @type kubernetes_metadata
   kubernetes_url ${KUBERNETES_URL}
   verify_ssl ${KUBERNETES_VERIFY_SSL}
   preserve_json_log ${KUBERNETES_PRESERVE_JSON_LOG}
@@ -62,8 +62,8 @@ cat << EOF >> /etc/fluent/fluent.conf
 </filter>
 
 <match **>
-  type elasticsearch$([ "${ELASTICSEARCH_DYNAMIC}" == "true" ] && echo _dynamic)
-  log_level info
+  @type elasticsearch$([ "${ELASTICSEARCH_DYNAMIC}" == "true" ] && echo _dynamic)
+  @log_level info
   include_tag_key true
   time_key time
   host ${ELASTICSEARCH_HOST}
