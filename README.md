@@ -1,5 +1,7 @@
 # Fluentd Log Collector For Kubernetes
 
+[![license](https://img.shields.io/github/fabric8io/docker-fluentd-kubernetes.svg?maxAge=2592000)]()
+
 This image captures logs from Docker containers,
 enriches with Kubernetes metadata & pushes to the
 specified Elasticsearch service deployed in your
