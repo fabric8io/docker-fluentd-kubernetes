@@ -26,6 +26,7 @@ dymamic, e.g. to select index name prefix based on the namespace field
 logs (default: `1`)
 * `FLUENTD_RETRY_LIMIT` - number of retries on flush failures
 (default: `10`)
+* `FLUENTD_REQUEST_TIMEOUT` - HTTP request timeout (default: `5s`)
 * `FLUENTD_DISABLE_RETRY_LIMIT` - disable retry limit (default: `true`)
 * `FLUENTD_RETRY_WAIT` - time to wait between retries (default:
 `1s`)
